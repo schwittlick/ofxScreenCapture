@@ -88,9 +88,9 @@ bool ofxScreenCapture::equals( ofImage* first, ofImage* second )
 			for (int x = 0; x < first->getWidth(); ++x )
 			{
 				int index = y * first->getWidth() + x;
-				int firstColor = first_image_pixelsref_array[index];
-				int secondColor = second_image_pixelsref_array[index];
-				if(firstColor != secondColor )
+				int *firstColor = (int*)(&first_image_pixelsref_array[index]);
+				int *secondColor = (int*)(&second_image_pixelsref_array[index]);
+				if(&firstColor != &secondColor )
 				{
 					ret = false;
 				}
