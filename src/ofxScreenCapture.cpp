@@ -67,3 +67,35 @@ void ofxScreenCapture::getImage( ofImage& im )
 		}
 	}
 }
+
+
+bool ofxScreenCapture::equals( ofImage* first, ofImage* second )
+{
+	bool ret = true;
+	ofPixels* first_image_pixelsref = &first->getPixelsRef();
+	ofPixels* second_image_pixelsref = &second->getPixelsRef();
+	unsigned char* first_image_pixelsref_array = first_image_pixelsref->getPixels();
+	unsigned char* second_image_pixelsref_array = second_image_pixelsref->getPixels();
+#pragma omp parallel num_threads(8)
+	{
+		int ct = omp_get_thread_num();
+		int num = omp_get_num_threads();
+		int pt = first->getHeight() / num;
+		int start = ct * pt;
+		int end = (ct + 1) * pt;
+		for( int y=start; y < end; ++y )
+		{
+			for (int x = 0; x < first->getWidth(); ++x )
+			{
+				int index = y * first->getWidth() + x;
+				int firstColor = first_image_pixelsref_array[index];
+				int secondColor = second_image_pixelsref_array[index];
+				if(firstColor != secondColor )
+				{
+					ret = false;
+				}
+			}
+		}
+	}
+	return ret;
+}
