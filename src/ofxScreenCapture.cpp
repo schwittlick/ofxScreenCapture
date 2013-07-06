@@ -2,6 +2,7 @@
 
 ofxScreenCapture::ofxScreenCapture(void)
 {
+	
 	hScreen = GetDC(NULL);
     ScreenX = GetDeviceCaps(hScreen, HORZRES);
     ScreenY = GetDeviceCaps(hScreen, VERTRES);
@@ -31,21 +32,19 @@ ofxScreenCapture::~ofxScreenCapture(void)
 
 void ofxScreenCapture::update( void ) 
 {
-	if(ofGetFrameNum() % 20 == 0)
-	{
-		hScreen = GetDC(NULL);
-		ScreenX = GetDeviceCaps(hScreen, HORZRES);
-		ScreenY = GetDeviceCaps(hScreen, VERTRES);
-		hdcMem = CreateCompatibleDC (hScreen);
-		hBitmap = CreateCompatibleBitmap(hScreen, ScreenX, ScreenY);
-		HGDIOBJ hOld = SelectObject(hdcMem, hBitmap);
-		BitBlt(hdcMem, 0, 0, ScreenX, ScreenY, hScreen, 0, 0, SRCCOPY);
-		SelectObject(hdcMem, hOld);
+	hScreen = GetDC(NULL);
+	ScreenX = GetDeviceCaps(hScreen, HORZRES);
+	ScreenY = GetDeviceCaps(hScreen, VERTRES);
+	hdcMem = CreateCompatibleDC (hScreen);
+	hBitmap = CreateCompatibleBitmap(hScreen, ScreenX, ScreenY);
+	HGDIOBJ hOld = SelectObject(hdcMem, hBitmap);
+	BitBlt(hdcMem, 0, 0, ScreenX, ScreenY, hScreen, 0, 0, SRCCOPY);
+	SelectObject(hdcMem, hOld);
 
-		GetDIBits(hdcMem, hBitmap, 0, ScreenY, pPixels, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
-		ReleaseDC(NULL,hScreen);
-		DeleteDC(hdcMem);
-	}
+	GetDIBits(hdcMem, hBitmap, 0, ScreenY, pPixels, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
+	ReleaseDC(NULL,hScreen);
+	DeleteDC(hdcMem);
+
 }
 
 void ofxScreenCapture::getImage( ofImage& im ) 
