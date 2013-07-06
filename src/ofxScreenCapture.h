@@ -5,6 +5,7 @@
 #include <olectl.h>
 #include "ofMain.h"
 #include <time.h>
+#include <omp.h>
 
 /*
  * author: marcel schwittlick (mrzl)
@@ -22,12 +23,14 @@ public:
 	void update( void );
 	void getImage( ofImage& im ); // benchmarked: ~70-80ms for 1920x1080
 
+	bool equals( ofImage* first, ofImage* second ); // utility to compare two ofimages
+
 private:
-	RGBQUAD *pPixels;
-	int ScreenX, ScreenY;
-	HDC hdcMem;
-	HBITMAP hBitmap;
-	HDC hScreen;
-	BITMAPINFOHEADER bmi;
+	RGBQUAD *screenPixels;
+	int screen_x, screen_y;
+	HBITMAP screen_bitmap;
+	HDC compatible_screen_context;
+	HDC screen_context;
+	BITMAPINFOHEADER info;
 };
 

@@ -2,62 +2,61 @@
 
 ofxScreenCapture::ofxScreenCapture(void)
 {
-	
-	hScreen = GetDC(NULL);
-    ScreenX = GetDeviceCaps(hScreen, HORZRES);
-    ScreenY = GetDeviceCaps(hScreen, VERTRES);
-    hdcMem = CreateCompatibleDC (hScreen);
-    hBitmap = CreateCompatibleBitmap(hScreen, ScreenX, ScreenY);
-    HGDIOBJ hOld = SelectObject(hdcMem, hBitmap);
-    BitBlt(hdcMem, 0, 0, ScreenX, ScreenY, hScreen, 0, 0, SRCCOPY);
-    SelectObject(hdcMem, hOld);
+	screen_context = GetDC(NULL);
+    screen_x = GetDeviceCaps(screen_context, HORZRES);
+    screen_y = GetDeviceCaps(screen_context, VERTRES);
+    compatible_screen_context = CreateCompatibleDC (screen_context);
+    screen_bitmap = CreateCompatibleBitmap(screen_context, screen_x, screen_y);
+    HGDIOBJ hOld = SelectObject(compatible_screen_context, screen_bitmap);
+    BitBlt(compatible_screen_context, 0, 0, screen_x, screen_y, screen_context, 0, 0, SRCCOPY);
+    SelectObject(compatible_screen_context, hOld);
 
-    bmi;
-    bmi.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.biPlanes = 1;
-    bmi.biBitCount = 32;
-    bmi.biWidth = ScreenX;
-    bmi.biHeight = -ScreenY;
-    bmi.biCompression = BI_RGB;
-    bmi.biSizeImage = 0;// 3 * ScreenX * ScreenY;
+    info;
+    info.biSize = sizeof(BITMAPINFOHEADER);
+    info.biPlanes = 1;
+    info.biBitCount = 32;
+    info.biWidth = screen_x;
+    info.biHeight = -screen_y;
+    info.biCompression = BI_RGB;
+    info.biSizeImage = 0;
 
-	pPixels = new RGBQUAD[ScreenX * ScreenY];
+	screenPixels = new RGBQUAD[screen_x * screen_y];
 }
 
 
 ofxScreenCapture::~ofxScreenCapture(void)
 {
-	delete pPixels;
+	delete screenPixels;
 }
 
 void ofxScreenCapture::update( void ) 
 {
-	hScreen = GetDC(NULL);
-	ScreenX = GetDeviceCaps(hScreen, HORZRES);
-	ScreenY = GetDeviceCaps(hScreen, VERTRES);
-	hdcMem = CreateCompatibleDC (hScreen);
-	hBitmap = CreateCompatibleBitmap(hScreen, ScreenX, ScreenY);
-	HGDIOBJ hOld = SelectObject(hdcMem, hBitmap);
-	BitBlt(hdcMem, 0, 0, ScreenX, ScreenY, hScreen, 0, 0, SRCCOPY);
-	SelectObject(hdcMem, hOld);
+	screen_context = GetDC(NULL);
+	screen_x = GetDeviceCaps(screen_context, HORZRES);
+	screen_y = GetDeviceCaps(screen_context, VERTRES);
+	compatible_screen_context = CreateCompatibleDC (screen_context);
+	screen_bitmap = CreateCompatibleBitmap(screen_context, screen_x, screen_y);
+	HGDIOBJ hOld = SelectObject(compatible_screen_context, screen_bitmap);
+	BitBlt(compatible_screen_context, 0, 0, screen_x, screen_y, screen_context, 0, 0, SRCCOPY);
+	SelectObject(compatible_screen_context, hOld);
 
-	GetDIBits(hdcMem, hBitmap, 0, ScreenY, pPixels, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
-	ReleaseDC(NULL,hScreen);
-	DeleteDC(hdcMem);
+	GetDIBits(compatible_screen_context, screen_bitmap, 0, screen_y, screenPixels, (BITMAPINFO*)&info, DIB_RGB_COLORS);
+	ReleaseDC(NULL,screen_context);
+	DeleteDC(compatible_screen_context);
 
 }
 
 void ofxScreenCapture::getImage( ofImage& im ) 
 {
-	im.allocate(ScreenX, ScreenY, OF_IMAGE_COLOR_ALPHA);
+	im.allocate(screen_x, screen_y, OF_IMAGE_COLOR_ALPHA);
 	
-	for(int y = 0; y < ScreenY; ++y )
+	for(int y = 0; y < screen_y; ++y )
 	{
-		for( int x = 0; x < ScreenX; ++x )
+		for( int x = 0; x < screen_x; ++x )
 		{
-			int index = y * ScreenX + x;
+			int index = y * screen_x + x;
 
-			RGBQUAD p = pPixels[index];
+			RGBQUAD p = screenPixels[index];
 			int r = p.rgbRed;
 			int g = p.rgbGreen;
 			int b = p.rgbBlue;
@@ -88,9 +87,10 @@ bool ofxScreenCapture::equals( ofImage* first, ofImage* second )
 			for (int x = 0; x < first->getWidth(); ++x )
 			{
 				int index = y * first->getWidth() + x;
-				int *firstColor = (int*)(&first_image_pixelsref_array[index]);
-				int *secondColor = (int*)(&second_image_pixelsref_array[index]);
-				if(&firstColor != &secondColor )
+				int firstColor = first_image_pixelsref_array[index];
+				int secondColor = second_image_pixelsref_array[index];
+
+				if(firstColor != secondColor )
 				{
 					ret = false;
 				}
